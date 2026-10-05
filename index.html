@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Premio Desbloqueado!</title>
+    
+    <!-- Tailwind CSS para los estilos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Canvas Confetti para los efectos de celebración -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- Tone.js para la generación de efectos de sonido (Tick de la ruleta) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    
+    <!-- Fuentes de Google: Inter para texto, Roboto Mono para los números -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #022c22 100%);
+            color: white;
+        }
+        .number-font {
+            font-family: 'Roboto Mono', monospace;
+            font-variant-numeric: tabular-nums; 
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(22, 163, 74, 0.8); }
+            100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.5); }
+        }
+        .glow-effect {
+            animation: glow 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+
+    <!-- AQUÍ PONES TU ARCHIVO DE AUDIO LOCAL -->
+    <!-- Cambia "tu-sonido.mp3" por el nombre exacto del archivo que tienes en tu PC -->
+    <audio id="audio-triunfo" src="triunfo.mp3" preload="auto"></audio>
+
+    <!-- Pantalla de Inicio / Botón para desbloquear el audio -->
+    <div id="start-overlay" class="hidden absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+        <button id="reveal-btn" class="px-10 py-5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-full text-2xl shadow-[0_0_30px_rgba(34,197,94,0.6)] transition-all transform hover:scale-105 active:scale-95 border border-white/30 tracking-wide uppercase">
+            Revelar Premio
+        </button>
+    </div>
+
+    <!-- Contenedor Principal del Premio -->
+    <div id="prize-container" class="hidden w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-8 text-center shadow-2xl transition-all duration-500 transform scale-95 opacity-0">
+        
+        <!-- Logo o Icono -->
+        <div class="w-48 h-32 mx-auto flex items-center justify-center mb-6 shadow-lg bg-white px-2 rounded-2xl">
+            <img src="logo-bimco.png" alt="BIMCO">
+        </div>
+
+        <h1 class="text-2xl font-bold text-gray-200 mb-2 uppercase tracking-wider">¡Felicidades, ganaste!</h1>
+        <p class="text-gray-400 text-sm mb-6">Muestra esta pantalla al staff para recibir tu premio.</p>
+        
+        <!-- Contenedor del Monto (Ruleta) -->
+        <div class="bg-black/30 rounded-2xl p-6 mb-4 border border-white/10">
+            <div class="flex items-center justify-center space-x-2">
+                <span class="text-4xl font-bold text-green-400">$</span>
+                <span id="amount-display" class="number-font text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
+                    0000
+                </span>
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        // 1. Definir los montos posibles de premio
+        const montosDisponibles = [500, 1000, 1500, 2000, 2500, 5000, 7500, 10000];
+        
+        // Seleccionar un monto al azar
+        const montoGanado = montosDisponibles[Math.floor(Math.random() * montosDisponibles.length)];
+
+        // 2. Referencias a elementos del DOM
+        const prizeContainer = document.getElementById('prize-container');
+        const amountDisplay = document.getElementById('amount-display');
+        const startOverlay = document.getElementById('start-overlay');
+        const revealBtn = document.getElementById('reveal-btn');
+        const audioTriunfo = document.getElementById('audio-triunfo');
+
+        // Función para animar los números (Efecto Ruleta)
+        function animatePrize(finalAmount, duration) {
+            let startTime = null;
+            let lastTick = 0;
+            
+            // Sintetizador para el "tick" de la ruleta (Tone.js)
+            const tickSynth = new Tone.MembraneSynth().toDestination();
+            tickSynth.volume.value = -15; 
+            
+            const step = (timestamp) => {
+                if (!startTime) startTime = timestamp;
+                const progress = timestamp - startTime;
+
+                if (progress < duration) {
+                    // Generar un número aleatorio para el efecto visual
+                    const randomNum = Math.floor(Math.random() * 9000) + 100;
+                    amountDisplay.innerText = randomNum.toLocaleString('es-AR');
+                    
+                    // Reproducir el sonido tipo "clac" cada 80 milisegundos
+                    if (timestamp - lastTick > 80) {
+                        tickSynth.triggerAttackRelease("C2", "32n");
+                        lastTick = timestamp;
+                    }
+
+                    window.requestAnimationFrame(step);
+                } else {
+                    // Finalizar animación mostrando el monto ganado final
+                    amountDisplay.innerText = finalAmount.toLocaleString('es-AR');
+                    prizeContainer.classList.add('glow-effect');
+                    
+                    // Reproducir el sonido local del usuario
+                    audioTriunfo.play().catch(e => console.log("Error al reproducir audio de triunfo", e));
+
+                    triggerConfetti();
+                }
+            };
+            
+            window.requestAnimationFrame(step);
+        }
+
+        // Función para lanzar confeti
+        function triggerConfetti() {
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                var particleCount = 50 * (timeLeft / duration);
+                
+                var colors = ['#22c55e', '#10b981', '#ffffff', '#f59e0b'];
+                
+                confetti(Object.assign({}, defaults, { particleCount, colors: colors, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, colors: colors, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
+        // 3. Lógica al cargar la página
+        window.onload = () => {
+            // Mostrar siempre el botón de inicio sin depender de un QR
+            startOverlay.classList.remove('hidden');
+
+            revealBtn.addEventListener('click', async () => {
+                // Iniciar el contexto de audio de Tone.js
+                await Tone.start();
+                
+                // Ocultar overlay
+                startOverlay.style.opacity = '0';
+                setTimeout(() => startOverlay.classList.add('hidden'), 300);
+
+                // Mostrar el contenedor
+                prizeContainer.classList.remove('hidden');
+                setTimeout(() => {
+                    prizeContainer.classList.remove('scale-95', 'opacity-0');
+                    prizeContainer.classList.add('scale-100', 'opacity-100');
+                }, 50);
+
+                // Iniciar la animación
+                setTimeout(() => {
+                    animatePrize(montoGanado, 2500);
+                }, 500); 
+            });
+        };
+    </script>
+</body>
+</html>
