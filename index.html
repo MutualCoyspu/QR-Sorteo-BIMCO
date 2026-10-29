@@ -3,184 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¡Premio Desbloqueado!</title>
-    
-    <!-- Tailwind CSS para los estilos -->
+    <title>¡Revelá tu Premio!</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Canvas Confetti para los efectos de celebración -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
-    <!-- Tone.js para la generación de efectos de sonido (Tick de la ruleta) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    
-    <!-- Fuentes de Google: Inter para texto, Roboto Mono para los números -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #022c22 100%);
+            background-color: #fafafa;
+            color: #1a1a1a;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .font-serif-elegant {
+            font-family: 'Cinzel', serif;
+        }
+
+        @keyframes fade-in-up {
+            0% { transform: translateY(15px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .animate-fade-in-up {
+            animation: fade-in-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .animate-delay-1 { animation-delay: 0.3s; }
+        .animate-delay-2 { animation-delay: 0.6s; }
+
+        @keyframes pulse-elegant {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        .animate-pulse-elegant {
+            animation: pulse-elegant 1.5s infinite ease-in-out;
+        }
+
+        .gold-gradient {
+            background: linear-gradient(135deg, #FFDF73 0%, #D4AF37 50%, #AA7C11 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(22, 101, 52, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Botón Revelar Premio */
+        .reveal-btn {
+            background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+            color: #ffffff;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 16px 40px;
+            border-radius: 9999px;
+            border: 1px solid rgba(212, 175, 55, 0.6);
+            box-shadow: 0 10px 25px -8px rgba(22, 101, 52, 0.5);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .reveal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px -8px rgba(22, 101, 52, 0.6);
+        }
+        .reveal-btn:active {
+            transform: scale(0.97);
+        }
+
+        .store-btn {
+            background-color: #1a1a1a;
             color: white;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            border-radius: 12px;
+            padding: 10px 18px;
+            text-decoration: none;
+            width: 180px;
+            border: 1px solid #333;
+            justify-content: flex-start;
         }
-        .number-font {
-            font-family: 'Roboto Mono', monospace;
-            font-variant-numeric: tabular-nums; 
+        .store-btn:hover {
+            background-color: #000000;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
-        
-        @keyframes glow {
-            0% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.5); }
-            50% { box-shadow: 0 0 40px rgba(22, 163, 74, 0.8); }
-            100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.5); }
+        .store-btn img {
+            width: 28px;
+            height: 28px;
+            margin-right: 12px;
+            flex-shrink: 0;
         }
-        .glow-effect {
-            animation: glow 2s infinite ease-in-out;
+        .store-text-container {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+        .store-text-small {
+            font-size: 0.65rem;
+            line-height: 1;
+            margin-bottom: 3px;
+            color: #d1d5db;
+        }
+        .store-text-large {
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1;
+            letter-spacing: -0.02em;
         }
     </style>
 </head>
+<body class="relative flex flex-col justify-center min-h-screen px-4 py-8">
 
-<body class="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-green-50 rounded-full blur-[120px] pointer-events-none -z-10"></div>
 
-    <!-- AQUÍ PONES TU ARCHIVO DE AUDIO LOCAL -->
-    <!-- Cambia "tu-sonido.mp3" por el nombre exacto del archivo que tienes en tu PC -->
-    <audio id="audio-triunfo" src="triunfo.mp3" preload="auto"></audio>
+    <div class="w-full max-w-lg mx-auto flex flex-col items-center z-10">
 
-    <!-- Pantalla de Inicio / Botón para desbloquear el audio -->
-    <div id="start-overlay" class="hidden absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300">
-        <button id="reveal-btn" class="px-10 py-5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-full text-2xl shadow-[0_0_30px_rgba(34,197,94,0.6)] transition-all transform hover:scale-105 active:scale-95 border border-white/30 tracking-wide uppercase">
-            Revelar Premio
-        </button>
-    </div>
-
-    <!-- Contenedor Principal del Premio -->
-    <div id="prize-container" class="hidden w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-8 text-center shadow-2xl transition-all duration-500 transform scale-95 opacity-0">
-        
-        <!-- Logo o Icono -->
-        <div class="w-48 h-32 mx-auto flex items-center justify-center mb-6 shadow-lg bg-white px-2 rounded-2xl">
-            <img src="logo-bimco.png" alt="BIMCO">
+        <div class="mb-2 animate-fade-in-up">
+            <img src="logo-bimco.png" alt="Logo Billetera" class="h-24 md:h-32 object-contain drop-shadow-sm opacity-90 hover:opacity-100 transition-opacity">
         </div>
 
-        <h1 class="text-2xl font-bold text-gray-200 mb-2 uppercase tracking-wider">¡Felicidades, ganaste!</h1>
-        <p class="text-gray-400 text-sm mb-6">Muestra esta pantalla al staff para recibir tu premio.</p>
-        
-        <!-- Contenedor del Monto (Ruleta) -->
-        <div class="bg-black/30 rounded-2xl p-6 mb-4 border border-white/10">
-            <div class="flex items-center justify-center space-x-2">
-                <span class="text-4xl font-bold text-green-400">$</span>
-                <span id="amount-display" class="number-font text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
-                    0000
-                </span>
+        <div class="glass-card rounded-3xl p-8 md:p-10 w-full text-center mb-10 relative overflow-hidden" id="main-card">
+
+            <!-- Pantalla de Inicio (botón Revelar Premio) -->
+            <div id="start-screen" class="flex flex-col items-center justify-center py-8 animate-fade-in-up">
+                <p class="text-sm text-gray-500 uppercase tracking-[0.2em] mb-6 font-medium">Tu premio te espera</p>
+                <button id="reveal-btn" class="reveal-btn">Revelar Premio</button>
+            </div>
+
+            <!-- Pantalla de Cuenta Regresiva -->
+            <div id="countdown-screen" class="hidden flex-col items-center justify-center py-8">
+                <p class="text-sm text-gray-500 uppercase tracking-[0.2em] mb-4 font-medium">Revelando en</p>
+                <div id="countdown" class="text-7xl font-serif-elegant font-bold text-gray-800 animate-pulse-elegant">3</div>
+            </div>
+
+            <!-- Pantalla de Resultado -->
+            <div id="result-screen" class="hidden py-4">
+                <div class="animate-fade-in-up">
+                    <h1 id="prize-text" class="font-serif-elegant text-5xl md:text-6xl mb-4 font-bold tracking-tight text-gray-800"></h1>
+                    <p id="message-text" class="text-base font-medium text-gray-500 mt-2 px-4"></p>
+                </div>
+
+                <!-- Mensaje para el Staff -->
+                <div id="action-container" class="mt-8 hidden animate-fade-in-up animate-delay-1">
+                    <div class="h-[1px] w-16 bg-gray-200 mx-auto mb-4"></div>
+                    <p class="text-xs uppercase tracking-[0.2em] text-[#166534] font-bold bg-green-50 inline-block px-4 py-2 rounded-full border border-green-100">
+                        Presentar al staff del evento
+                    </p>
+                </div>
             </div>
         </div>
-        
+
+        <div id="download-section" class="hidden w-full text-center px-2 animate-fade-in-up animate-delay-2">
+            <h2 class="text-[#2d3748] text-xl md:text-2xl font-bold mb-3">¡Llevá tu billetera siempre con vos!</h2>
+            <p class="text-[#718096] text-sm md:text-base mb-8 leading-relaxed font-light max-w-sm mx-auto">
+                Descargá la app de Bimco y empezá a disfrutar de facilidades y ahorros exclusivos para nuestros asociados.
+            </p>
+
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="https://play.google.com/store/apps/details?id=com.agilpagos.coyspuapp&hl=es_AR" target="_blank" class="store-btn shadow-lg">
+                    <img src="https://img.icons8.com/color/50/google-play.png" alt="Google Play">
+                    <div class="store-text-container">
+                        <span class="store-text-small">Descargar en</span>
+                        <span class="store-text-large">Google Play</span>
+                    </div>
+                </a>
+
+                <a href="https://apps.apple.com/us/app/billetera-mutual-coyspu/id1659915883" target="_blank" class="store-btn shadow-lg">
+                    <img src="https://img.icons8.com/ios-filled/50/ffffff/mac-os.png" alt="App Store">
+                    <div class="store-text-container">
+                        <span class="store-text-small">Descargar en</span>
+                        <span class="store-text-large">App Store</span>
+                    </div>
+                </a>
+            </div>
+        </div>
     </div>
 
     <script>
-        // 1. Definir los montos posibles de premio
-        const montosDisponibles = [500, 1000, 1500, 2000, 2500, 5000, 7500, 10000];
-        
-        // Seleccionar un monto al azar
+        const winSound = new Audio('triunfo.mp3');
+        winSound.preload = 'auto';
+
+        // Montos posibles de premio (0 = sin premio)
+        const montosDisponibles = [0, 0, 5000, 5000, 5000, 5000, 10000 ,10000, 10000, 15000];
         const montoGanado = montosDisponibles[Math.floor(Math.random() * montosDisponibles.length)];
 
-        // 2. Referencias a elementos del DOM
-        const prizeContainer = document.getElementById('prize-container');
-        const amountDisplay = document.getElementById('amount-display');
-        const startOverlay = document.getElementById('start-overlay');
+        const startScreen = document.getElementById('start-screen');
         const revealBtn = document.getElementById('reveal-btn');
-        const audioTriunfo = document.getElementById('audio-triunfo');
+        const countdownEl = document.getElementById('countdown');
+        const countdownScreen = document.getElementById('countdown-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const prizeText = document.getElementById('prize-text');
+        const messageText = document.getElementById('message-text');
+        const actionContainer = document.getElementById('action-container');
+        const downloadSection = document.getElementById('download-section');
 
-        // Función para animar los números (Efecto Ruleta)
-        function animatePrize(finalAmount, duration) {
-            let startTime = null;
-            let lastTick = 0;
-            
-            // Sintetizador para el "tick" de la ruleta (Tone.js)
-            const tickSynth = new Tone.MembraneSynth().toDestination();
-            tickSynth.volume.value = -15; 
-            
-            const step = (timestamp) => {
-                if (!startTime) startTime = timestamp;
-                const progress = timestamp - startTime;
+        function fireConfetti() {
+            var duration = 3000;
+            var end = Date.now() + duration;
 
-                if (progress < duration) {
-                    // Generar un número aleatorio para el efecto visual
-                    const randomNum = Math.floor(Math.random() * 9000) + 100;
-                    amountDisplay.innerText = randomNum.toLocaleString('es-AR');
-                    
-                    // Reproducir el sonido tipo "clac" cada 80 milisegundos
-                    if (timestamp - lastTick > 80) {
-                        tickSynth.triggerAttackRelease("C2", "32n");
-                        lastTick = timestamp;
-                    }
+            (function frame() {
+                confetti({
+                    particleCount: 3,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#166534', '#ffffff', '#22c55e']
+                });
+                confetti({
+                    particleCount: 3,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#166534', '#ffffff', '#22c55e']
+                });
 
-                    window.requestAnimationFrame(step);
-                } else {
-                    // Finalizar animación mostrando el monto ganado final
-                    amountDisplay.innerText = finalAmount.toLocaleString('es-AR');
-                    prizeContainer.classList.add('glow-effect');
-                    
-                    // Reproducir el sonido local del usuario
-                    audioTriunfo.play().catch(e => console.log("Error al reproducir audio de triunfo", e));
-
-                    triggerConfetti();
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
                 }
-            };
-            
-            window.requestAnimationFrame(step);
+            }());
         }
 
-        // Función para lanzar confeti
-        function triggerConfetti() {
-            var duration = 3 * 1000;
-            var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+        function revealPrize() {
+            countdownScreen.classList.add('hidden');
+            countdownScreen.classList.remove('flex');
+            resultScreen.classList.remove('hidden');
+            downloadSection.classList.remove('hidden');
 
-            function randomInRange(min, max) {
-                return Math.random() * (max - min) + min;
+            if (montoGanado > 0) {
+                prizeText.textContent = '$' + montoGanado.toLocaleString('es-AR');
+                prizeText.classList.add('gold-gradient');
+                prizeText.classList.remove('text-gray-800');
+
+                messageText.textContent = '¡Felicidades! Ganaste un premio exclusivo.';
+                actionContainer.classList.remove('hidden');
+
+                winSound.currentTime = 0;
+                winSound.play().catch(error => console.log("El navegador bloqueó el sonido:", error));
+
+                setTimeout(fireConfetti, 100);
+            } else {
+                prizeText.innerHTML = '¡Ups! <span class="inline-block align-middle text-4xl md:text-5xl opacity-60 filter grayscale transition-all duration-500 hover:grayscale-0 hover:opacity-100 cursor-default">😔</span>';
+                prizeText.classList.remove('gold-gradient');
+                prizeText.classList.add('text-gray-400');
+
+                messageText.textContent = 'Suerte la próxima vez. ¡Gracias por participar!';
             }
-
-            var interval = setInterval(function() {
-                var timeLeft = animationEnd - Date.now();
-
-                if (timeLeft <= 0) {
-                    return clearInterval(interval);
-                }
-
-                var particleCount = 50 * (timeLeft / duration);
-                
-                var colors = ['#22c55e', '#10b981', '#ffffff', '#f59e0b'];
-                
-                confetti(Object.assign({}, defaults, { particleCount, colors: colors, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                confetti(Object.assign({}, defaults, { particleCount, colors: colors, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-            }, 250);
         }
 
-        // 3. Lógica al cargar la página
-        window.onload = () => {
-            // Mostrar siempre el botón de inicio sin depender de un QR
-            startOverlay.classList.remove('hidden');
+        function startCountdown() {
+            let timeLeft = 3;
+            countdownEl.textContent = timeLeft;
 
-            revealBtn.addEventListener('click', async () => {
-                // Iniciar el contexto de audio de Tone.js
-                await Tone.start();
-                
-                // Ocultar overlay
-                startOverlay.style.opacity = '0';
-                setTimeout(() => startOverlay.classList.add('hidden'), 300);
+            const timer = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    countdownEl.textContent = timeLeft;
+                } else {
+                    clearInterval(timer);
+                    revealPrize();
+                }
+            }, 1000);
+        }
 
-                // Mostrar el contenedor
-                prizeContainer.classList.remove('hidden');
-                setTimeout(() => {
-                    prizeContainer.classList.remove('scale-95', 'opacity-0');
-                    prizeContainer.classList.add('scale-100', 'opacity-100');
-                }, 50);
+        revealBtn.addEventListener('click', () => {
+            revealBtn.disabled = true;
 
-                // Iniciar la animación
-                setTimeout(() => {
-                    animatePrize(montoGanado, 2500);
-                }, 500); 
-            });
-        };
+            // Desbloquear el audio con el gesto del usuario (clic), así luego puede sonar al ganar
+            winSound.play().then(() => {
+                winSound.pause();
+                winSound.currentTime = 0;
+            }).catch(() => {});
+
+            startScreen.classList.add('hidden');
+            countdownScreen.classList.remove('hidden');
+            countdownScreen.classList.add('flex');
+
+            startCountdown();
+        });
     </script>
 </body>
 </html>
